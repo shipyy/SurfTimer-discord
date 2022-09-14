@@ -187,13 +187,13 @@ public Action CommandDiscordTest(int client, int args)
 	CPrintToChat(client, "{blue}[SurfTimer-Discord] {green}Sending bonus record test message.");
 	surftimer_OnNewRecord(client, 0, "00:00:00", "-00:00:00", 1);
 	CPrintToChat(client, "{blue}[SurfTimer-Discord] {green}Sending stage record test message.");
-	surftimer_OnNewWRCP(client, 0, "00:00:00", "-00:00:00", 3, 0.0);
+	surftimer_OnNewWRCP(client, 0, "00:00:00", "-00:00:00", 3);
 	CPrintToChat(client, "{blue}[SurfTimer-Discord] {green}Sending {red}styled{green} bonus record test message.");
 	surftimer_OnNewRecord(client, 5, "00:00:00", "-00:00:00", 1);
 	CPrintToChat(client, "{blue}[SurfTimer-Discord] {green}Sending {red}styled{green} main record test message.");
 	surftimer_OnNewRecord(client, 5, "00:00:00", "-00:00:00", -1);
 	CPrintToChat(client, "{blue}[SurfTimer-Discord] {green}Sending {red}styled{green} stage record test message.");
-	surftimer_OnNewWRCP(client, 5, "00:00:00", "-00:00:00", 3, 0.0);
+	surftimer_OnNewWRCP(client, 5, "00:00:00", "-00:00:00", 3);
 	CPrintToChat(client, "{blue}[SurfTimer-Discord] {green}Sending {red}Challenge{green} test message.");
 	
 	mapchallenge_OnNewChallenge(client, "surf_beginner", 0, 420, "Mon Jan 1 00:00:00 1969", "Thu Aug 23 14:55:02 2001");
@@ -473,7 +473,7 @@ public void surftimer_OnNewRecord(int client, int style, char[] time, char[] tim
 		sendDiscordAnnouncement(client, style, time, timeDif, bonusGroup, -1);
 }
 
-public void surftimer_OnNewWRCP(int client, int style, char[] time, char[] timeDif, int stage, float fRunTime)
+public void surftimer_OnNewWRCP(int client, int style, char[] time, char[] timeDif, int stage)
 {
 	if (strncmp(g_szApiKey, "", 1) != 0)
 		GetProfilePictureURL(client, style, time, timeDif, -1, stage);
@@ -849,7 +849,9 @@ stock void sendDiscordAnnouncement(int client, int style, char[] szTime, char[] 
 	}
 	else
 	{
-		// Send Discord Announcement
+		//Mention
+		char szMention[128];
+		GetConVarString(g_cvAnnounceMention, szMention, 128);
 		Webhook hook = new Webhook();
 
 		hook.SetUsername(webhookName);
@@ -857,19 +859,40 @@ stock void sendDiscordAnnouncement(int client, int style, char[] szTime, char[] 
 		// Format The Message
 		char szMessage[256];
 
+		char szPlayerStyle[128];
+		switch (style)
+		{
+			case 1: strcopy(szPlayerStyle, sizeof szPlayerStyle, "[Sideways]");
+			case 2: strcopy(szPlayerStyle, sizeof szPlayerStyle, "[Half Sideways]");
+			case 3: strcopy(szPlayerStyle, sizeof szPlayerStyle, "[Backwards]");
+			case 4: strcopy(szPlayerStyle, sizeof szPlayerStyle, "[Low Gravity]");
+			case 5: strcopy(szPlayerStyle, sizeof szPlayerStyle, "[Slow Motion]");
+			case 6: strcopy(szPlayerStyle, sizeof szPlayerStyle, "[Fast Forward]");
+			case 7: strcopy(szPlayerStyle, sizeof szPlayerStyle, "[Free Style]");
+		}
+
 		if (bonusGroup == -1 && stage < 1)
 		{
-			Format(szMessage, sizeof(szMessage), "```md\n# New Server Record on %s #\n\n[%s] beat the server record on < %s > with a time of < %s (%s) > ]:```", g_szHostname, szName, g_szCurrentMap, szTime, szTimeDif);
+			if (style != 0)
+				Format(szMessage, sizeof(szMessage), "%s\n```md\n# New Server Record on %s #\n\n[%s] beat the %s server record on <%s> with a time of [%s](%s):```", szMention, g_szHostname, szName, szPlayerStyle, g_szCurrentMap, szTime, szTimeDif);
+			else
+				Format(szMessage, sizeof(szMessage), "%s\n```md\n# New Server Record on %s #\n\n[%s] beat the server record on <%s> with a time of [%s](%s):```", szMention, g_szHostname, szName, g_szCurrentMap, szTime, szTimeDif);
 		}
 		else
 		{
 			if (stage > 0)
 			{
-				Format(szMessage, sizeof(szMessage), "```md\n# New Stage #%i Record on %s #\n\n[%s] beat the stage #%i record on < %s > with a time of < %s (%s) > ]:```", stage, g_szHostname, szName, stage, g_szCurrentMap, szTime, szTimeDif);
+				if (style != 0)
+					Format(szMessage, sizeof(szMessage), "```md\n# New Stage #%i Record on %s #\n\n[%s] beat the %s stage #%i record on <%s> with a time of [%s](%s)```", stage, g_szHostname, szName, szPlayerStyle, stage, g_szCurrentMap, szTime, szTimeDif);
+				else
+					Format(szMessage, sizeof(szMessage), "```md\n# New Stage #%i Record on %s #\n\n[%s] beat the stage #%i record on <%s> with a time of [%s](%s)```", stage, g_szHostname, szName, stage, g_szCurrentMap, szTime, szTimeDif);
 			}
 			else
 			{
-				Format(szMessage, sizeof(szMessage), "```md\n# New Bonus #%i Record on %s #\n\n[%s] beat the bonus #%i record on < %s > with a time of < %s (%s) > ]:```", bonusGroup, g_szHostname, szName, bonusGroup, g_szCurrentMap, szTime, szTimeDif);
+				if (style != 0)
+					Format(szMessage, sizeof(szMessage), "```md\n# New Bonus #%i Record on %s #\n\n[%s] beat the %s bonus #%i record on <%s> with a time of [%s](%s)```", bonusGroup, g_szHostname, szName, szPlayerStyle, bonusGroup, g_szCurrentMap, szTime, szTimeDif);
+				else
+					Format(szMessage, sizeof(szMessage), "```md\n# New Bonus #%i Record on %s #\n\n[%s] beat the bonus #%i record on <%s> with a time of [%s](%s)```", bonusGroup, g_szHostname, szName, bonusGroup, g_szCurrentMap, szTime, szTimeDif);
 			}
 		}
 		hook.SetContent(szMessage);
