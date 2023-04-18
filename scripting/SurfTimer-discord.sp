@@ -315,11 +315,11 @@ public void SendBugReport(int iClient, char[] szText)
 	GetConVarString(g_cvBugReportMention, szMention, sizeof szMention);
 	if (!StrEqual(szMention, ""))  // Checks if mention is disabled
 	{
-		hook.SetContent(szMention);
+		hook.SetContent(szMention); 
 	}
 
 	char szBugTrackerName[64];
-	GetConVarString(g_cvBotUsername, szBugTrackerName, sizeof g_cvBotUsername);
+	GetConVarString(g_cvBotUsername, szBugTrackerName, sizeof szBugTrackerName);
 
 	hook.SetUsername(szBugTrackerName);
 
@@ -366,12 +366,11 @@ public void SendBugReport(int iClient, char[] szText)
 
 	hook.AddEmbed(embed);
 	hook.Execute(webhook, OnWebHookExecuted, iClient);
-	if (g_bDebugging)
-	{
+	#if defined DEBUG
 		char szDebugOutput[10000];
 		hook.ToString(szDebugOutput, sizeof szDebugOutput);
 		PrintToServer(szDebugOutput);
-	}
+	#endif
 	delete hook;
 
 	CPrintToChat(iClient, "{blue}[SurfTimer-Discord] %t", "BugReport Sent");
@@ -874,25 +873,25 @@ stock void sendDiscordAnnouncement(int client, int style, char[] szTime, char[] 
 		if (bonusGroup == -1 && stage < 1)
 		{
 			if (style != 0)
-				Format(szMessage, sizeof(szMessage), "%s\n```md\n# New Server Record on %s #\n\n[%s] beat the %s server record on <%s> with a time of [%s](%s):```", szMention, g_szHostname, szName, szPlayerStyle, g_szCurrentMap, szTime, szTimeDif);
+				Format(szMessage, sizeof(szMessage), "%s\n```md\n# New Server Record on %s #\n\n[%s] beat the %s server record on <%s> with a time of [%s][%s]:```", szMention, g_szHostname, szName, szPlayerStyle, g_szCurrentMap, szTime, szTimeDif);
 			else
-				Format(szMessage, sizeof(szMessage), "%s\n```md\n# New Server Record on %s #\n\n[%s] beat the server record on <%s> with a time of [%s](%s):```", szMention, g_szHostname, szName, g_szCurrentMap, szTime, szTimeDif);
+				Format(szMessage, sizeof(szMessage), "%s\n```md\n# New Server Record on %s #\n\n[%s] beat the server record on <%s> with a time of [%s][%s]:```", szMention, g_szHostname, szName, g_szCurrentMap, szTime, szTimeDif);
 		}
 		else
 		{
 			if (stage > 0)
 			{
 				if (style != 0)
-					Format(szMessage, sizeof(szMessage), "```md\n# New Stage #%i Record on %s #\n\n[%s] beat the %s stage #%i record on <%s> with a time of [%s](%s)```", stage, g_szHostname, szName, szPlayerStyle, stage, g_szCurrentMap, szTime, szTimeDif);
+					Format(szMessage, sizeof(szMessage), "```md\n# New Stage #%i Record on %s #\n\n[%s] beat the %s stage #%i record on <%s> with a time of [%s][%s]```", stage, g_szHostname, szName, szPlayerStyle, stage, g_szCurrentMap, szTime, szTimeDif);
 				else
-					Format(szMessage, sizeof(szMessage), "```md\n# New Stage #%i Record on %s #\n\n[%s] beat the stage #%i record on <%s> with a time of [%s](%s)```", stage, g_szHostname, szName, stage, g_szCurrentMap, szTime, szTimeDif);
+					Format(szMessage, sizeof(szMessage), "```md\n# New Stage #%i Record on %s #\n\n[%s] beat the stage #%i record on <%s> with a time of [%s][%s]```", stage, g_szHostname, szName, stage, g_szCurrentMap, szTime, szTimeDif);
 			}
 			else
 			{
 				if (style != 0)
-					Format(szMessage, sizeof(szMessage), "```md\n# New Bonus #%i Record on %s #\n\n[%s] beat the %s bonus #%i record on <%s> with a time of [%s](%s)```", bonusGroup, g_szHostname, szName, szPlayerStyle, bonusGroup, g_szCurrentMap, szTime, szTimeDif);
+					Format(szMessage, sizeof(szMessage), "```md\n# New Bonus #%i Record on %s #\n\n[%s] beat the %s bonus #%i record on <%s> with a time of [%s][%s]```", bonusGroup, g_szHostname, szName, szPlayerStyle, bonusGroup, g_szCurrentMap, szTime, szTimeDif);
 				else
-					Format(szMessage, sizeof(szMessage), "```md\n# New Bonus #%i Record on %s #\n\n[%s] beat the bonus #%i record on <%s> with a time of [%s](%s)```", bonusGroup, g_szHostname, szName, bonusGroup, g_szCurrentMap, szTime, szTimeDif);
+					Format(szMessage, sizeof(szMessage), "```md\n# New Bonus #%i Record on %s #\n\n[%s] beat the bonus #%i record on <%s> with a time of [%s][%s]```", bonusGroup, g_szHostname, szName, bonusGroup, g_szCurrentMap, szTime, szTimeDif);
 			}
 		}
 		hook.SetContent(szMessage);
